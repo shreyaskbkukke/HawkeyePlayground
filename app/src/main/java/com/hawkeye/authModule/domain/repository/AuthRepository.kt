@@ -1,13 +1,9 @@
 package com.hawkeye.authModule.domain.repository
 
 import android.content.ContentValues.TAG
-import android.content.Context
 import android.util.Log
-import android.widget.Toast
-import androidx.compose.ui.platform.LocalContext
 import com.google.firebase.FirebaseException
 import com.google.firebase.FirebaseNetworkException
-import com.google.firebase.FirebaseTooManyRequestsException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
@@ -20,7 +16,7 @@ interface AuthRepository {
 
     suspend fun register(email:String, password: String):Boolean
 
-    
+    suspend fun forgetPassword(email: String):Boolean
 }
 class FirebaseAuthRepository @Inject constructor() : AuthRepository {
 
@@ -113,7 +109,36 @@ class FirebaseAuthRepository @Inject constructor() : AuthRepository {
             false
         }
     }
+    override suspend fun forgetPassword(
+        email: String
+    ):Boolean {
+        return try {
+            firebaseAuth.sendPasswordResetEmail(email).await()
+            true
+        } catch (e: FirebaseAuthInvalidUserException) {
+            // User account does not exist
+            Log.e(TAG, "Invalid user account: ${e.message}", e)
+            ErrorHolder.errorMessage = e.message ?: "Invalid user account: ${e.message}"
+            false
+        } catch (e: FirebaseNetworkException) {
+            // Network connectivity issues
+            Log.e(TAG, "Network error occurred: ${e.message}", e)
+            ErrorHolder.errorMessage = e.message ?: "Network error occurred: ${e.message}"
+            false
+        } catch (e: FirebaseException) {
+            // Handle other exceptions
+            Log.e(TAG, "Password reset failed: ${e.message}", e)
+            ErrorHolder.errorMessage = e.message ?: "Password reset failed: ${e.message}"
+            false
+        } catch (e: Exception) {
+            // Handle other exceptions
+            Log.e(TAG, "An unexpected error occurred: ${e.message}", e)
+            ErrorHolder.errorMessage = e.message ?: "An unexpected error occurred: ${e.message}"
+            false
+        }
+    }
 }
+
 object ErrorHolder {
     var errorMessage: String? = null
 }

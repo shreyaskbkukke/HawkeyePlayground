@@ -2,9 +2,11 @@ package com.hawkeye.authModule.presentation
 
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,8 +24,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -47,9 +49,9 @@ import com.hawkeye.ui.theme.whiteGrayOrange
 fun LoginScreen(
     onLoginSuccessNavigation: () -> Unit,
     onNavigateToRegisterScreen: () -> Unit,
+    onNavigateToForgetScreen: () -> Unit,
     loginViewModel: LoginViewModel = hiltViewModel()
 ) {
-
     NavDestinationHelper(
         shouldNavigate = {
             loginViewModel.loginState.isSuccessfullyLoggedIn
@@ -95,6 +97,7 @@ fun LoginScreen(
             },
             onEmailChanged = loginViewModel::onEmailInputChange,
             onPasswordChanged = loginViewModel::onPasswordInputChange,
+            onNavigateToForgetScreen = onNavigateToForgetScreen,
             onLoginButtonClick = loginViewModel::onLoginClick,
             isPasswordShown = {
                 loginViewModel.loginState.isPasswordShown
@@ -117,13 +120,13 @@ fun LoginScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .offset(y = (450).dp)
+                .offset(y = (480).dp)
                 .wrapContentHeight()
                 .padding(20.dp, 15.dp, 20.dp, 5.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ){
             Text(
-                "No account yet?",
+                "Already have an account?",
                 style = MaterialTheme.typography.body2
             )
             AuthButton(
@@ -161,13 +164,12 @@ fun LoginContainer(
     onPasswordChanged:(String) -> Unit,
     onLoginButtonClick:()->Unit,
     isPasswordShown:()->Boolean,
+    onNavigateToForgetScreen:()-> Unit,
     onTrailingPasswordIconClick: () -> Unit,
     errorHint:()->String?,
     isLoading:()->Boolean,
     modifier: Modifier = Modifier
 ) {
-    val focusManager = LocalFocusManager.current
-
     Column(
        modifier = modifier,
        verticalArrangement = Arrangement.spacedBy(15.dp)
@@ -209,6 +211,26 @@ fun LoginContainer(
            }else PasswordVisualTransformation(),
            keyboardType = KeyboardType.Password
        )
+        Row(
+            modifier = Modifier
+                .padding(start = 200.dp)
+        ) {
+            Text(
+                "Forget password?",
+                style = MaterialTheme.typography.body2
+            )
+            Text(
+                "Reset",
+                modifier = Modifier
+                    .padding(start = 5.dp)
+                    .clickable {
+                        onNavigateToForgetScreen()
+                    },
+                color = orange,
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.body2
+            )
+        }
        Column(
            modifier = Modifier
                .fillMaxWidth(),
@@ -228,7 +250,8 @@ fun LoginContainer(
            )
            Text(
                errorHint() ?: "",
-               style = MaterialTheme.typography.caption
+               style = MaterialTheme.typography.caption,
+               color = Color.Red
            )
        }
    }

@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.hawkeye.authModule.domain.repository.ErrorHolder
 import com.hawkeye.authModule.presentation.FinalDestination
+import com.hawkeye.authModule.presentation.ForgetScreen
 import com.hawkeye.authModule.presentation.LoginScreen
 import com.hawkeye.authModule.presentation.RegisterScreen
 
@@ -20,13 +21,18 @@ fun Navigation() {
         composable(ScreenRoutes.LoginScreen.route){
             LoginScreen(
                 onLoginSuccessNavigation = {
-                    navController.navigate(ScreenRoutes.FinalDestination.route){
+                    navController.navigate(ScreenRoutes.FinalDestination.route) {
                         ErrorHolder.errorMessage = "Login Successful"
                         popUpTo(0)
                     }
                 },
                 onNavigateToRegisterScreen = {
-                    navController.navigate(ScreenRoutes.RegisterScreen.route){
+                    navController.navigate(ScreenRoutes.RegisterScreen.route) {
+                        popUpTo(0)
+                    }
+                },
+                onNavigateToForgetScreen = {
+                    navController.navigate(ScreenRoutes.ForgetScreen.route) {
                         popUpTo(0)
                     }
                 }
@@ -47,6 +53,23 @@ fun Navigation() {
                 }
             )
         }
+        //
+        composable(ScreenRoutes.ForgetScreen.route){
+            ForgetScreen(
+                onForgetSuccessNavigation = {
+                    navController.navigate(ScreenRoutes.LoginScreen.route) {
+                        ErrorHolder.errorMessage = "Email Sent Successfully"
+                        popUpTo(0)
+                    }
+                },
+                onNavigateToLoginScreen = {
+                    navController.navigate(ScreenRoutes.LoginScreen.route) {
+                        popUpTo(0)
+                    }
+                }
+            )
+        }
+        //
         composable(ScreenRoutes.FinalDestination.route){
             FinalDestination()
         }
@@ -57,5 +80,6 @@ fun Navigation() {
 sealed class ScreenRoutes(val route:String){
     object LoginScreen:ScreenRoutes("login_screen")
     object RegisterScreen:ScreenRoutes("register_screen")
+    object ForgetScreen:ScreenRoutes("forget_screen")
     object FinalDestination:ScreenRoutes("final_destination")
 }

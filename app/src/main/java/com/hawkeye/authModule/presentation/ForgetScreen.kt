@@ -16,8 +16,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.RemoveRedEye
-import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,9 +23,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.hawkeye.authModule.domain.repository.ErrorHolder
@@ -36,7 +31,7 @@ import com.hawkeye.authModule.presentation.components.BubbleAnimation
 import com.hawkeye.authModule.presentation.components.HeaderBackground
 import com.hawkeye.authModule.presentation.components.NavDestinationHelper
 import com.hawkeye.authModule.presentation.components.TextEntryModule
-import com.hawkeye.authModule.presentation.viewmodel.RegisterViewModel
+import com.hawkeye.authModule.presentation.viewmodel.ForgetPasswordViewModel
 import com.hawkeye.ui.theme.gray
 import com.hawkeye.ui.theme.orange
 import com.hawkeye.ui.theme.white
@@ -44,25 +39,23 @@ import com.hawkeye.ui.theme.whiteGray
 import com.hawkeye.ui.theme.whiteGrayOrange
 
 @Composable
-fun RegisterScreen(
-    onRegisterSuccessNavigation: () -> Unit,
+fun ForgetScreen(
+    onForgetSuccessNavigation:() -> Unit,
     onNavigateToLoginScreen: () -> Unit,
-    registerViewModel: RegisterViewModel = hiltViewModel()
-) {
-
+    forgetViewModel: ForgetPasswordViewModel = hiltViewModel()
+){
     NavDestinationHelper(
         shouldNavigate = {
-            registerViewModel.registerState.isSuccessfullyRegistered
+            forgetViewModel.forgetPasswordState.isSuccessfullySent
         },
         destination = {
-            onRegisterSuccessNavigation()
+            onForgetSuccessNavigation()
         }
     )
-
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(white),
+            .background(white)
     ){
         Box(
             modifier = Modifier
@@ -77,47 +70,28 @@ fun RegisterScreen(
                     .fillMaxSize()
             )
             Text(
-                text = "Register",
+                text = "Forget Password",
                 style = MaterialTheme.typography.h4,
                 color = white,
                 fontWeight = FontWeight.SemiBold
             )
         }
-        RegisterContainer(
+        ForgetContainer(
             emailValue = {
-                registerViewModel.registerState.emailInput
-            },
-            passwordValue = {
-                registerViewModel.registerState.passwordInput
-            },
-            passwordRepeatedValue = {
-                registerViewModel.registerState.passwordRepeatedInput
+                forgetViewModel.forgetPasswordState.emailInput
             },
             buttonEnabled = {
-                registerViewModel.registerState.isInputValid
+                forgetViewModel.forgetPasswordState.isInputValid
             },
-            onEmailChanged = registerViewModel::onEmailInputChange,
-            onPasswordChanged = registerViewModel::onPasswordInputChange,
-            onPasswordRepeatedChanged = registerViewModel::onPasswordRepeatedInputChange,
-            onButtonClick = registerViewModel::onRegisterClick,
-            isPasswordShown = {
-                registerViewModel.registerState.isPasswordShown
-            },
-            isPasswordRepeatedShown = {
-                registerViewModel.registerState.isPasswordRepeatedShown
-            },
-            onTrailingPasswordIconClick = {
-                registerViewModel.onToggleVisualTransformationPassword()
-            },
-            onTrailingPasswordRepeatedIconClick = {
-                registerViewModel.onToggleVisualTransformationPasswordRepeated()
-            },
+            onEmailChanged = forgetViewModel::onEmailInputChange,
+            onForgetPasswordClick = forgetViewModel::onResetPasswordClick,
             errorHint = {
-                registerViewModel.registerState.errorMessageInput
+                forgetViewModel.forgetPasswordState.errorMessageInput
             },
             isLoading = {
-                registerViewModel.registerState.isLoading
+                forgetViewModel.forgetPasswordState.isLoading
             },
+
             modifier = Modifier
                 .padding(top = 200.dp)
                 .fillMaxWidth(0.9f)
@@ -129,13 +103,13 @@ fun RegisterScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .offset(y = (535).dp)
+                .offset(y = (370).dp)
                 .wrapContentHeight()
                 .padding(20.dp, 15.dp, 20.dp, 5.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ){
             Text(
-                "Already have an account?",
+                "Back to login?",
                 style = MaterialTheme.typography.body2
             )
             AuthButton(
@@ -158,33 +132,24 @@ fun RegisterScreen(
             bubbleColor2 = orange,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(220.dp)
-                .align(Alignment.BottomCenter),
+                .height(250.dp)
+                .align(Alignment.BottomCenter)
         )
     }
 }
 
 @Composable
-fun RegisterContainer(
-    emailValue:() -> String,
-    passwordValue:() -> String,
-    passwordRepeatedValue:() -> String,
-    buttonEnabled:() -> Boolean,
-    onEmailChanged:(String)->Unit,
-    onPasswordChanged:(String)->Unit,
-    onPasswordRepeatedChanged:(String)->Unit,
-    onButtonClick:()->Unit,
-    isPasswordShown: ()->Boolean,
-    isPasswordRepeatedShown: ()->Boolean,
-    onTrailingPasswordIconClick: ()->Unit,
-    onTrailingPasswordRepeatedIconClick: ()->Unit,
-    errorHint:() -> String?,
-    isLoading:() -> Boolean,
+fun ForgetContainer(
+    emailValue:()-> String,
+    buttonEnabled:()-> Boolean,
+    onEmailChanged:(String)-> Unit,
+    errorHint:()->String?,
+    isLoading:()->Boolean,
     modifier: Modifier = Modifier,
-) {
-
+    onForgetPasswordClick: ()-> Unit
+){
     Column(
-        modifier = modifier,
+        modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(15.dp)
     ){
         val errorMessage = ErrorHolder.errorMessage
@@ -197,52 +162,13 @@ fun RegisterContainer(
                 .fillMaxWidth(),
             description = "Email address",
             hint = "username@gmail.com",
-            leadingIcon = Icons.Default.Email,
             textValue = emailValue(),
             textColor = gray,
             cursorColor = orange,
             onValueChanged = onEmailChanged,
             trailingIcon = null,
-            onTrailingIconClick = null
-        )
-
-        TextEntryModule(
-            modifier = Modifier
-                .fillMaxWidth(),
-            description = "Password",
-            hint = "Enter Password",
-            leadingIcon = Icons.Default.VpnKey,
-            textValue = passwordValue(),
-            textColor = gray,
-            cursorColor = orange,
-            onValueChanged = onPasswordChanged,
-            keyboardType = KeyboardType.Password,
-            visualTransformation = if(isPasswordShown()){
-                VisualTransformation.None
-            } else PasswordVisualTransformation(),
-            trailingIcon = Icons.Default.RemoveRedEye,
-            onTrailingIconClick = {
-                onTrailingPasswordIconClick()
-            }
-        )
-        TextEntryModule(
-            modifier = Modifier
-                .fillMaxWidth(),
-            description = "Password repeated",
-            hint = "Conform Password",
-            leadingIcon = Icons.Default.VpnKey,
-            textValue = passwordRepeatedValue(),
-            textColor = gray,
-            cursorColor = orange,
-            onValueChanged = onPasswordRepeatedChanged,
-            keyboardType = KeyboardType.Password,
-            visualTransformation = if(isPasswordRepeatedShown()){
-                VisualTransformation.None
-            } else PasswordVisualTransformation(),
-            trailingIcon = Icons.Default.RemoveRedEye,
-            onTrailingIconClick = {
-                onTrailingPasswordRepeatedIconClick()
-            }
+            onTrailingIconClick = null,
+            leadingIcon = Icons.Default.Email
         )
         Column(
             modifier = Modifier
@@ -250,7 +176,7 @@ fun RegisterContainer(
             verticalArrangement = Arrangement.spacedBy(5.dp)
         ){
             AuthButton(
-                text = "Register",
+                text = "Send Mail",
                 backgroundColor = orange,
                 contentColor = white,
                 enabled = buttonEnabled(),
@@ -258,8 +184,8 @@ fun RegisterContainer(
                     .fillMaxWidth()
                     .height(45.dp)
                     .shadow(5.dp, RoundedCornerShape(25.dp)),
-                onButtonClick = onButtonClick,
-                isLoading = isLoading()
+                isLoading = isLoading(),
+                onButtonClick = onForgetPasswordClick
             )
             Text(
                 errorHint() ?: "",

@@ -14,4 +14,8 @@ class AuthRepositoryImpl : AuthRepository {
         return true
     }
 
+    override suspend fun forgetPassword(email: String):Boolean {
+        delay(1000)
+        return true
+    }
 }
