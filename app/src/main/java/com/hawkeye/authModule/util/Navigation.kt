@@ -41,10 +41,10 @@ fun Navigation() {
         composable(ScreenRoutes.RegisterScreen.route){
             RegisterScreen(
                 onRegisterSuccessNavigation = {
-                      navController.navigate(ScreenRoutes.FinalDestination.route){
-                          ErrorHolder.errorMessage = "Registration Successful"
-                          popUpTo(0)
-                      }
+                    navController.navigate(ScreenRoutes.FinalDestination.route){
+                        ErrorHolder.errorMessage = "Registration Successful"
+                        popUpTo(0)
+                    }
                 },
                 onNavigateToLoginScreen = {
                     navController.navigate(ScreenRoutes.LoginScreen.route){

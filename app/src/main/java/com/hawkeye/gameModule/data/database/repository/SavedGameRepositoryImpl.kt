@@ -1,0 +1,25 @@
+package com.hawkeye.gameModule.data.database.repository
+
+import com.hawkeye.gameModule.data.database.dao.SavedGameDao
+import com.hawkeye.gameModule.data.database.model.SavedGame
+import com.hawkeye.gameModule.data.database.model.SudokuBoard
+import com.hawkeye.gameModule.domain.repository.SavedGameRepository
+import kotlinx.coroutines.flow.Flow
+
+class SavedGameRepositoryImpl(
+    private val savedGameDao: SavedGameDao
+) : SavedGameRepository {
+    override fun getAll(): Flow<List<SavedGame>> = savedGameDao.getAll()
+
+    override suspend fun get(uid: Long): SavedGame? = savedGameDao.get(uid)
+
+    override fun getWithBoards(): Flow<Map<SavedGame, SudokuBoard>> = savedGameDao.getSavedWithBoards()
+
+    override fun getLast(): Flow<SavedGame?> = savedGameDao.getLast()
+
+    override suspend fun insert(savedGame: SavedGame): Long = savedGameDao.insert(savedGame)
+
+    override suspend fun update(savedGame: SavedGame) = savedGameDao.update(savedGame)
+
+    override suspend fun delete(savedGame: SavedGame) = savedGameDao.delete(savedGame)
+}

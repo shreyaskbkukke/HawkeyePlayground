@@ -1,44 +1,62 @@
 package com.hawkeye.ui.theme
 
+import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
-
-private val DarkColorPalette = darkColors(
-    primary = Purple200,
-    primaryVariant = Purple700,
-    secondary = Teal200
-)
-
-private val LightColorPalette = lightColors(
-    primary = Purple500,
-    primaryVariant = Purple700,
-    secondary = Teal200
-
-    /* Other default colors to override
-    background = Color.White,
-    surface = Color.White,
-    onPrimary = Color.White,
-    onSecondary = Color.Black,
-    onBackground = Color.Black,
-    onSurface = Color.Black,
-    */
-)
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.hawkeye.gameModule.ui.theme.AppColorScheme
+import com.hawkeye.gameModule.ui.theme.AppTheme
 
 @Composable
-fun HawkeyePlaygroundTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-    val colors = if (darkTheme) {
-        DarkColorPalette
-    } else {
-        LightColorPalette
+fun HawkerPlaygroundTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    // Dynamic color is available on Android 12+
+    dynamicColor: Boolean = true,
+    amoled: Boolean = false,
+    appTheme: AppTheme = AppTheme.Green,
+    content: @Composable () -> Unit,
+) {
+    val appColorScheme = AppColorScheme()
+    val currentTheme = appColorScheme.getTheme(appTheme, darkTheme)
+    val colorScheme = when {
+        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            val context = LocalContext.current
+
+            when {
+                darkTheme && amoled -> dynamicDarkColorScheme(context).copy(
+                    background = Color.Black,
+                    surface = Color.Black
+                )
+
+                darkTheme && !amoled -> dynamicDarkColorScheme(context)
+                else -> dynamicLightColorScheme(context)
+            }
+        }
+
+        darkTheme && amoled -> currentTheme.copy(background = Color.Black, surface = Color.Black)
+        darkTheme -> currentTheme
+        else -> currentTheme
     }
+    val systemUiController = rememberSystemUiController()
 
     MaterialTheme(
-        colors = colors,
-        typography = Typography,
-        shapes = Shapes,
-        content = content
+        colorScheme = colorScheme,
+        typography = com.hawkeye.gameModule.ui.theme.Typography,
+        content = {
+            SideEffect {
+                systemUiController.setSystemBarsColor(
+                    color = Color.Transparent,
+                    darkIcons = !darkTheme
+                )
+            }
+
+            content()
+        }
     )
 }
